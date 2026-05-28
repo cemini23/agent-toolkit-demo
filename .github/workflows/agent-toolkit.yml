@@ -1,0 +1,59 @@
+name: Agent toolkit CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  vet-good-skill:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cemini23/vet@main
+        with:
+          path: skills/good-skill/SKILL.md
+          profile: skillmd
+          strict: "true"
+
+  vet-bad-skill-should-fail:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cemini23/vet@main
+        with:
+          path: skills/bad-skill/SKILL.md
+          profile: skillmd
+          strict: "true"
+        continue-on-error: true
+        id: vet_bad
+      - run: test "${{ steps.vet_bad.outcome }}" = "failure"
+
+  vet-good-brief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cemini23/vet@main
+        with:
+          path: briefs/good-brief.md
+          profile: brief
+          root: .
+          strict: "true"
+
+  wikilint-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cemini23/wikilint@main
+        with:
+          wiki-dir: wiki
+          strict: "false"
+
+  phase0-verify-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cemini23/phase0@main
+        with:
+          command: verify-eval
+          target: evals/sample-eval.md
