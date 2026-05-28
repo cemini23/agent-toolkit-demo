@@ -1,14 +1,18 @@
 # Agent Toolkit Demo
 
-Minimal repo showing **vet + phase0 + wikilint** in CI on intentionally bad agent artifacts.
+[![Agent toolkit CI](https://github.com/cemini23/agent-toolkit-demo/actions/workflows/agent-toolkit.yml/badge.svg)](https://github.com/cemini23/agent-toolkit-demo/actions/workflows/agent-toolkit.yml)
+
+Minimal repo showing **vet + phase0 + wikilint** in CI — good artifacts pass, bad ones fail on purpose.
 
 | Tool | Path | Expected in CI |
 |------|------|----------------|
 | [vet](https://github.com/cemini23/vet) | `skills/good-skill/` | PASS |
-| vet | `skills/bad-skill/` | REJECT |
+| vet | `skills/bad-skill/` | REJECT (job asserts failure) |
 | vet | `briefs/good-brief.md` | PASS |
-| phase0 | `evals/sample-eval.md` | verify license column |
-| wikilint | `wiki/` | WARN (orphans + gaps by design) |
+| [phase0](https://github.com/cemini23/phase0) | `evals/sample-eval.md` | Mismatch detected (assert failure) |
+| [wikilint](https://github.com/cemini23/wikilint) | `wiki/` | PASS (clean graph) |
+
+Schema reference: [ara-schema](https://github.com/cemini23/ara-schema)
 
 ## Run locally
 
@@ -19,7 +23,7 @@ pip install git+https://github.com/cemini23/wikilint.git
 
 vet skills/good-skill/SKILL.md --profile skillmd --strict
 vet skills/bad-skill/SKILL.md --profile skillmd --strict   # exit 2
-phase0 verify-eval evals/sample-eval.md
+phase0 verify-eval evals/sample-eval.md                    # exit 2 on mismatch
 wikilint wiki/
 ```
 

@@ -49,11 +49,16 @@ jobs:
           wiki-dir: wiki
           strict: "false"
 
-  phase0-verify-eval:
+  phase0-detects-eval-mismatch:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: cemini23/phase0@v0.2.0
         with:
           command: verify-eval
           target: evals/sample-eval.md
+        continue-on-error: true
+        id: phase0_eval
+      - run: test "${{ steps.phase0_eval.outcome }}" = "failure"

@@ -1,10 +1,12 @@
 ---
-title: Page B
+title: Demo page B
 type: concept
 maturity: draft
-related: []
+related:
+  - concepts/a.md
+  - concepts/orphan.md
 created: 2026-01-01
 updated: 2026-01-01
 ---
 
-Orphan backlink target — A lists B but B does not list A.
+Demo wiki page B — bidirectional link with A.

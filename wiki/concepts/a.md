@@ -1,5 +1,5 @@
 ---
-title: Page A
+title: Demo page A
 type: concept
 maturity: draft
 related:
@@ -8,4 +8,4 @@ created: 2026-01-01
 updated: 2026-01-01
 ---
 
-Links to @concepts/b.md and @concepts/missing.md
+Demo wiki page A links to @concepts/b.md.
