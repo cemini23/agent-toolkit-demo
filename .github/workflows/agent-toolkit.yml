@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cemini23/vet@main
+      - uses: cemini23/vet@v0.2.0
         with:
           path: skills/good-skill/SKILL.md
           profile: skillmd
@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cemini23/vet@main
+      - uses: cemini23/vet@v0.2.0
         with:
           path: skills/bad-skill/SKILL.md
           profile: skillmd
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cemini23/vet@main
+      - uses: cemini23/vet@v0.2.0
         with:
           path: briefs/good-brief.md
           profile: brief
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cemini23/wikilint@main
+      - uses: cemini23/wikilint@v0.1.0
         with:
           wiki-dir: wiki
           strict: "false"
@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cemini23/phase0@main
+      - uses: cemini23/phase0@v0.2.0
         with:
           command: verify-eval
           target: evals/sample-eval.md
