@@ -30,3 +30,13 @@ wikilint wiki/
 ## Use as template
 
 Fork this repo or copy `.github/workflows/agent-toolkit.yml` into your project.
+
+## Related
+
+- Methodology newsletter: [Outlier Weekly](https://outlierweekly.substack.com)
+- Agent meta-wiki: [cemini-claude-code-CCC](https://github.com/cemini23/cemini-claude-code-CCC)
+- Toolkit: [vet](https://github.com/cemini23/vet) · [wikilint](https://github.com/cemini23/wikilint) · [phase0](https://github.com/cemini23/phase0) · [ara-schema](https://github.com/cemini23/ara-schema)
+
+## License
+
+MIT — see [LICENSE](LICENSE).
