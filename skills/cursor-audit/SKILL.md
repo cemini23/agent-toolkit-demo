@@ -208,6 +208,7 @@ Optional args in the same message:
 
 ## Related patterns
 
+- [super-audit](../super-audit/SKILL.md) — 5-model variant (3 Cursor + 2 API) for pre-ship prod reviews
 - [Glasswing deliberate disagreement](https://github.com/cemini23/cemini-claude-code-CCC/blob/main/wiki/entities/patterns/glasswing-deliberate-disagreement.md) — conflict table gates ship
 - [Subagent orchestration](https://github.com/cemini23/cemini-claude-code-CCC/blob/main/wiki/concepts/subagent-orchestration.md) — parallel Task dispatch
 - [vet](https://github.com/cemini23/vet) — static skill/brief veto gates (complements multi-model audit)

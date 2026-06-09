@@ -41,6 +41,7 @@ In Cursor chat:
 |-------|------|
 | Static skill/brief gates | [vet](https://github.com/cemini23/vet) |
 | Multi-model qualitative review | **cursor-audit** (this skill) |
+| Pre-ship 5-model council + API leg | [super-audit](../super-audit/) |
 | Third-party repo adoption | [phase0](https://github.com/cemini23/phase0) |
 | Wiki graph health | [wikilint](https://github.com/cemini23/wikilint) |
 
