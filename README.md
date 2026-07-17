@@ -27,7 +27,7 @@ See [skills/cursor-audit/README.md](skills/cursor-audit/README.md). Wiki: [cemin
 
 ### super-audit skill
 
-Five-model pre-ship council — three Cursor Task subagents plus two HTTP API auditors (OpenRouter / DeepSeek / custom `ADVISOR_*`). Tailor a prompt pack per run. Ships in `skills/super-audit/`:
+Five-model pre-ship council — three Cursor Task subagents plus two **OpenRouter** API auditors (`openrouter/fusion` + premium task model, default `z-ai/glm-5.2`). Requires **`OPENROUTER_API_KEY`** in `~/.cemini/llm-routing.env` for full coverage. Tailor a prompt pack per run. Ships in `skills/super-audit/`:
 
 ```bash
 cp -r skills/super-audit ~/.cursor/skills/
@@ -73,6 +73,7 @@ Voluntary tips fund open research and tooling. **Donation-only addresses** — n
 |--------------|---------|
 | **EVM** (Ethereum, Polygon, Base, Arbitrum, …) | `0x444C5C2eC439E0382aa5a17F70313c536BcC5D58` |
 | **Solana / SVM** | `J4zNn4hK9jTrKBFY8sbAGJHLoZvXvQf4B9pQSbSrocZE` |
+| **Polymarket** (referral) | [polymarket.com/?r=Cemini23](https://polymarket.com/?r=Cemini23) |
 
 
 ## License
