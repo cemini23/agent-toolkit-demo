@@ -1,114 +1,164 @@
 # Super audit — reference
 
-## Default 5-auditor roster
+Extends [cursor-audit model delegation](../cursor-audit/reference.md). Same **premium tier** and **role-based** picks for Cursor slots 1–3; API slots 4–5 use **API roles** below.
 
-| Slot | Channel | Model slug | Provider | Env / key |
-|------|---------|------------|----------|-----------|
-| 1 | Cursor Task | `claude-opus-4-8-thinking-high` | Anthropic | (Cursor subscription) |
-| 2 | Cursor Task | `gpt-5.3-codex` | OpenAI | (Cursor subscription) |
-| 3 | Cursor Task | `gemini-3.1-pro` | Google | (Cursor subscription) |
-| 4 | HTTP API | `x-ai/grok-4.3` | OpenRouter | `OPENROUTER_API_KEY` |
-| 5 | HTTP API | `deepseek-reasoner` | DeepSeek | `DEEPSEEK_API_KEY` |
+## 5-auditor layout
 
-Substitute unavailable Cursor slugs per [cursor-audit reference](../cursor-audit/reference.md) (Anthropic fallback: opus → sonnet). Never duplicate provider family in slots 1–3.
+| Slot | Channel | Delegation |
+|------|---------|------------|
+| 1–3 | Cursor Task | Mode → role matrix (cursor-audit reference) |
+| 4–5 | HTTP API | Mode → API role matrix (this file) |
 
-### Quick mode (4 auditors)
+**Quick mode:** slots 1–3 (premium Cursor roles) + slot 5 API only (skip slot 4 adversarial).
 
-Slots 1–3 unchanged; slot 5 only for API (`deepseek-reasoner`). Skip slot 4.
+## Selection procedure (parent — Step 2)
+
+1. Classify **mode** (add **`prod-ship`** for bot/config deploy GO/NO-GO).
+2. Resolve **Cursor roles** for slots 1–3 per cursor-audit reference.
+3. Resolve **API roles** for slots 4–5 per mode → API role matrix.
+4. Run `discover_api_keys.py` — map available keys to API role candidates.
+5. Build or select `auditors.json` from role picks (see templates below).
+6. Announce:
+
+   > Super audit — mode: `prod-ship` · Cursor roles: agentic-reasoning/codex/third-lens · API roles: adversarial/deep-reasoning · pack: `{path}`
+
+Never paste API keys into chat.
+
+## Mode → Cursor roles (slots 1–3)
+
+Same as cursor-audit, plus:
+
+| Mode | Slot 1 | Slot 2 | Slot 3 | Use when |
+|------|--------|--------|--------|----------|
+| **prod-ship** | agentic-reasoning | code-implementation | third-lens | Bot deploy, conviction.yaml, tournament lane (**super-audit default**) |
+
+All other modes: see [cursor-audit reference](../cursor-audit/reference.md#mode--role-matrix).
+
+## Mode → API roles (slots 4–5)
+
+| Mode | Slot 4 role | Slot 5 role |
+|------|-------------|-------------|
+| **prod-ship** | api-adversarial | api-deep-reasoning |
+| **code-debug** | api-adversarial | api-deep-reasoning |
+| **security** | api-adversarial | api-deep-reasoning |
+| **config-infra** | api-deep-reasoning | api-adversarial |
+| **brief-plan** | api-strategic | api-deep-reasoning |
+| **architecture** | api-adversarial | api-deep-reasoning |
+| **quick** | *(skip)* | api-deep-reasoning |
+
+## API + local catalog
+
+| API role | Purpose | Provider | Candidates (best first) |
+|----------|---------|----------|---------------------------|
+| **api-adversarial** | Red-team, contrarian deploy takes | OpenRouter | **`openrouter/fusion`** |
+| **api-adversarial** | Same role, **free** | **Ollama** | Best **qwen\***, then largest `*b` (`discover_api_keys.py`) |
+| **api-deep-reasoning** | Quant depth, patch ranking | OpenRouter | **`OPENROUTER_PREMIUM_MODEL`** → `z-ai/glm-5.2` |
+| **api-deep-reasoning** | Same role, **free** | **Ollama** | Same local model, reasoning system prompt |
+| **api-strategic** | Brief GO/NO-GO | OpenRouter | `anthropic/claude-opus-4.6` |
+| **api-advisor** | Domain-tuned | `ADVISOR_*` or OR | pro-tier `ADVISOR_MODEL` |
+
+**Auto-routing (`--discover`) — operator default:**
+
+| OpenRouter | Ollama | Auditors | API slots |
+|------------|--------|----------|-----------|
+| yes | yes | **6** | Fusion + premium + **local cross-check** |
+| yes | no | **5** | Fusion + premium |
+| no | yes | **5** (fallback) | 2× local |
+| no | no | **3** (degraded) | none |
+
+Slot 6 local is **additive** when Ollama is up. `SUPER_AUDIT_SKIP_LOCAL=1` forces 5-model. Operator chat overrides win.
+
+### Tailoring API roles by domain
+
+| Domain | Slot 4 | Slot 5 |
+|--------|--------|--------|
+| Poker / trading bot | api-adversarial (`openrouter/fusion`) | api-deep-reasoning (`OPENROUTER_PREMIUM_MODEL` / GLM 5.2) |
+| WC bot / conviction | api-advisor (pro `ADVISOR_MODEL`) | api-deep-reasoning (premium @ OR) |
+| Adoption brief | api-strategic (Opus @ OR) | api-deep-reasoning (GLM 5.2 @ OR) |
+| Security | api-adversarial (Fusion) | api-deep-reasoning (premium @ OR) |
+
+Use OpenRouter model IDs from [openrouter.ai/models](https://openrouter.ai/models).
 
 ## API key discovery (run before Step 4b)
 
-Search order (first file wins for each variable; script does not overwrite existing env):
+Sources (process environment wins over file values for the same key):
 
-| Priority | Path |
-|----------|------|
-| 1 | `$CEMINI_LLM_ROUTING_ENV` |
-| 2 | `~/.cemini/llm-routing.env` |
-| 3 | `{workspace}/.env` |
-| 4 | `{workspace}/config/llm-routing.env` |
-| 5 | `{project}/.env` (when auditing a subproject) |
+| Priority | Source |
+|----------|--------|
+| 1 | Process environment (`OPENROUTER_*`, `OLLAMA_*`, `ADVISOR_*`, …) |
+| 2 | Optional file at `$CEMINI_LLM_ROUTING_ENV` (operator-set absolute path) |
+
+Scripts **do not** scan project dotenv trees or hardcoded home secret paths.
 
 **Variables to probe:**
 
 | Variable | Used for |
 |----------|----------|
-| `OPENROUTER_API_KEY` | Grok, Claude-via-OR, Gemini-via-OR, Kimi |
+| `OPENROUTER_API_KEY` | Premium legs — Fusion + slot 5 (optional if Ollama running) |
 | `OPENROUTER_BASE_URL` | Default `https://openrouter.ai/api/v1` |
-| `DEEPSEEK_API_KEY` | `deepseek-reasoner`, `deepseek-v4-flash` |
-| `DEEPSEEK_BASE_URL` | Default `https://api.deepseek.com/v1` |
-| `DEEPSEEK_MODEL` | Default model when slot says `deepseek-v4-flash` |
-| `ADVISOR_API_KEY` | WC bot / custom advisor (often = OpenRouter) |
-| `ADVISOR_BASE_URL` | Advisor OpenAI-compatible endpoint |
-| `ADVISOR_MODEL` | e.g. `google/gemini-2.5-flash` |
-| `ANTHROPIC_API_KEY` | Rare direct API (prefer OpenRouter for slot 4) |
-| `OPENAI_API_KEY` | Direct OpenAI (usually not needed — Cursor covers) |
+| `OPENROUTER_PREMIUM_MODEL` | Slot 5 paid default — **`z-ai/glm-5.2`** |
+| **`OLLAMA_BASE_URL`** | Default `http://localhost:11434/v1` — **free local leg** |
+| **`OLLAMA_MODEL`** | Override; else auto-pick best qwen* / largest `*b` |
+| `SUPER_AUDIT_SKIP_LOCAL` | `1` = drop slot 6 even when Ollama is running |
+| `ADVISOR_*` | Optional api-advisor override |
 
-**Session bootstrap:**
+Without OpenRouter **or** Ollama, super-audit runs **3-model cursor-audit only**.
 
-```bash
-source scripts/source_llm_routing_env.sh   # OSINT workspace
-```
-
-**Discovery script:**
+**Session setup (keys already exported):**
 
 ```bash
 python3 .cursor/skills/super-audit/scripts/discover_api_keys.py
-python3 .cursor/skills/super-audit/scripts/discover_api_keys.py --json
+python3 .cursor/skills/super-audit/scripts/run_api_auditors.py --pack ... --out ... --discover
 ```
 
-Output: which keys are present (masked), suggested API slots. Parent tells user what's missing before running API leg.
+Discovery writes recommended slots; `--discover` on run_api_auditors uses them automatically.
+Provider keys come from the process environment (or `CEMINI_LLM_ROUTING_ENV`).
 
-## auditors.json (override API slots)
+## auditors.json (build from roles)
 
-Place beside pack or pass `--auditors`. Example:
+Pass `--auditors path/to/auditors.json` to `run_api_auditors.py`. Labels should reflect **role**, not vendor lock-in.
+
+**Default fallback** (`auditors.default.json`) — prod-ship generic: api-adversarial + api-deep-reasoning.
 
 ```json
 {
   "slots": [
     {
-      "label": "grok-4.3-openrouter",
+      "label": "api-adversarial",
+      "role": "api-adversarial",
       "base_url_env": "OPENROUTER_BASE_URL",
       "api_key_env": "OPENROUTER_API_KEY",
-      "model": "x-ai/grok-4.3",
-      "extra": { "reasoning": { "effort": "high" } },
-      "system": "Super audit — adversarial readonly reviewer."
+      "model": "openrouter/fusion",
+      "extra": { "plugins": [{ "id": "fusion" }] },
+      "system": "Super audit — adversarial readonly reviewer. Follow required output format exactly."
     },
     {
-      "label": "deepseek-reasoner",
-      "base_url_env": "DEEPSEEK_BASE_URL",
-      "api_key_env": "DEEPSEEK_API_KEY",
-      "model": "deepseek-reasoner",
-      "system": "Super audit — quant/strategy readonly reviewer."
+      "label": "api-deep-reasoning",
+      "role": "api-deep-reasoning",
+      "base_url_env": "OPENROUTER_BASE_URL",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "model_env": "OPENROUTER_PREMIUM_MODEL",
+      "model": "z-ai/glm-5.2",
+      "system": "Super audit — deep reasoning readonly reviewer. Follow required output format exactly."
     }
   ]
 }
 ```
 
-### Tailoring examples for API slots
+**Brief-plan example** — swap slot 4 to api-strategic:
 
-| Domain | Slot 4 | Slot 5 |
-|--------|--------|--------|
-| Poker bot | `x-ai/grok-4.3` @ OR | `deepseek-reasoner` |
-| WC bot / conviction | `google/gemini-2.5-flash` via `ADVISOR_*` | `deepseek-v4-flash` |
-| Adoption brief | `anthropic/claude-opus-4.6` @ OR | `deepseek-reasoner` |
-| Security | `x-ai/grok-4.3` @ OR | `moonshotai/kimi-k2.5` @ OR |
+```json
+{
+  "label": "api-strategic",
+  "role": "api-strategic",
+  "base_url_env": "OPENROUTER_BASE_URL",
+  "api_key_env": "OPENROUTER_API_KEY",
+  "model": "anthropic/claude-opus-4.6",
+  "system": "Super audit — strategic readonly reviewer. Follow required output format exactly."
+}
+```
 
-Use OpenRouter model IDs as listed on [openrouter.ai/models](https://openrouter.ai/models).
-
-## Mode → Cursor triple
-
-Same defaults as cursor-audit for slots 1–3:
-
-| Mode | Model 1 | Model 2 | Model 3 |
-|------|---------|---------|---------|
-| **code-debug** | `gpt-5.3-codex` | `claude-opus-4-8-thinking-high` | `gemini-3.1-pro` |
-| **security** | `claude-opus-4-8-thinking-high` | `gpt-5.3-codex` | `grok-4.3` |
-| **config-infra** | `gemini-3.1-pro` | `gpt-5.5-medium` | `claude-4.6-sonnet-medium-thinking` |
-| **brief-plan** | `claude-opus-4-8-thinking-high` | `gpt-5.3-codex` | `kimi-k2.5` |
-| **architecture** | `claude-opus-4-8-thinking-high` | `gemini-3.1-pro` | `gpt-5.5-medium` |
-| **prod-ship** | `claude-opus-4-8-thinking-high` | `gpt-5.3-codex` | `gemini-3.1-pro` |
-
-**prod-ship** — default for bot/config deploy audits (poker S1, WC bot).
+Parent **rewrites `model`** fields when discovery or tailoring picks a different premium candidate for the role.
 
 ## Audit pack checklist
 
@@ -119,6 +169,7 @@ Same defaults as cursor-audit for slots 1–3:
 - [ ] Required output format block in prompt
 - [ ] Ruled-out hypotheses section
 - [ ] `meta.json` records build timestamp
+- [ ] Synthesis header lists roles + resolved slugs for all 5 slots
 
 ## Synthesis thresholds (5 auditors)
 

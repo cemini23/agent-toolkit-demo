@@ -22,7 +22,9 @@ cp -r skills/cursor-audit /path/to/your-project/.cursor/skills/
 ## Validate
 
 ```bash
-pip install git+https://github.com/cemini23/vet.git
+# Prefer a local checkout of vet (avoid remote install-from-URL in CI/agents):
+#   git clone https://github.com/cemini23/vet.git && pip install -e ./vet
+pip install vet
 vet skills/cursor-audit/SKILL.md --profile skillmd --strict
 ```
 
