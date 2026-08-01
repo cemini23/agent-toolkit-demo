@@ -36,6 +36,17 @@ jobs:
           profile: skillmd
           strict: "true"
 
+
+  vet-free-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cemini23/vet@v0.2.0
+        with:
+          path: skills/free-audit/SKILL.md
+          profile: skillmd
+          strict: "true"
+
   vet-bad-skill-should-fail:
     runs-on: ubuntu-latest
     steps:
